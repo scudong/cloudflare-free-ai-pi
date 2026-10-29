@@ -1,0 +1,30 @@
+README.md
+  876e8ebdf0d76efb 42,44,46-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8-ntes.9",
+  "base_commit_sha": "3933ec938a740dea64a4566e7d0eee3d415f6122",
+  "prompts": {
+    "876e8ebdf0d76efb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "89427376-645f-4bc2-a5f9-2fd15c3b781c",
+        "model": "glm-5.3-flash"
+      },
+      "human_author": "Gavin",
+      "messages": [],
+      "total_additions": 9,
+      "total_deletions": 7,
+      "accepted_lines": 9,
+      "overriden_lines": 0,
+      "per_file_stats": {
+        "README.md": {
+          "additions": 9,
+          "deletions": 7,
+          "accepted_lines": 9
+        }
+      }
+    }
+  }
+}
