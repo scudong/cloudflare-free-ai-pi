@@ -14,7 +14,7 @@
 - Agent：PiAgent Durable Object（src/agent.ts），用官方 Agents SDK 的 PiHarness（beta）
 - 模型：Workers AI binding，默认模型 @cf/zai-org/glm-5.3-flash
 - 知识库：ai_search_namespaces binding 指向 default 命名空间，实例名 cf-free-ai-pi-kb
-- 知识库实例用内置存储（built-in storage），不用 R2 桶
+- 知识库实例用 R2 数据源（桶 cf-free-ai-pi-docs）。注：官方文档里的 Items API 内置存储在 binding 运行时尚未生效
 - 初始化：POST /api/setup 幂等创建实例并上传 public/docs 下 3 份文档
 - 工具：ai_search（检索知识库）、now（UTC 时间）
 

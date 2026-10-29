@@ -1,7 +1,9 @@
 export { PiAgent } from "./agent";
 import type { PiAgent } from "./agent";
 
-const DO_NAME = "main";
+// Bump the suffix when defaults change: active DO instances keep running old
+// code until evicted (minutes), a new name picks up new code immediately.
+const DO_NAME = "main-v3";
 
 function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data, null, 2), {
@@ -106,6 +108,41 @@ export default {
             : null,
       };
       return json({ model: env.MODEL_ID, kb, shape });
+    }
+
+    // Diagnostic: which chat models can this plan actually run?
+    // GET /api/probe-models — tries each candidate with a 5-token "hi".
+    if (pathname === "/api/probe-models") {
+      const candidates = [
+        "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+        "@cf/meta/llama-3.1-8b-instruct-fast",
+        "@cf/meta/llama-4-scout-17b-16e-instruct",
+        "@cf/openai/gpt-oss-120b",
+        "@cf/openai/gpt-oss-20b",
+        "@cf/qwen/qwen3-30b-a3b-fp8",
+        "@cf/qwen/qwq-32b",
+        "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
+        "@cf/google/gemma-4-26b-a4b-it",
+        "@cf/nvidia/nemotron-3-120b-a12b",
+        "@cf/zai-org/glm-5.3-flash",
+        "@cf/moonshotai/kimi-k2.7-code",
+      ];
+      const results: Record<string, string> = {};
+      for (const model of candidates) {
+        try {
+          await env.AI.run(model, {
+            messages: [{ role: "user", content: "hi" }],
+            max_tokens: 5,
+          });
+          results[model] = "OK";
+        } catch (error) {
+          const msg = error instanceof Error ? error.message : String(error);
+          results[model] = /free plan/i.test(msg)
+            ? "paid-only"
+            : msg.slice(0, 100);
+        }
+      }
+      return json(results);
     }
 
     if (pathname === "/api/chat" && request.method === "POST") {

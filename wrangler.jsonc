@@ -35,7 +35,7 @@
   },
   "vars": {
     // Workers AI model. Free-plan eligible; swap via `wrangler deploy --var MODEL_ID:...`
-    "MODEL_ID": "@cf/deepseek-ai/deepseek-v4-flash-0731",
+    "MODEL_ID": "@cf/openai/gpt-oss-120b",
     // AI Search instance created by POST /api/setup
     "KB_INSTANCE": "cf-free-ai-pi-kb"
   }
