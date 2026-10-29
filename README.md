@@ -39,15 +39,17 @@ curl -X POST https://cloudflare-free-ai-pi.<your-subdomain>.workers.dev/api/setu
 4. **workers.dev 大陆 DNS 污染**：新域名解析到假 IP 导致"请求黑洞"（无响应、tail 无事件）。临时解法 `/etc/hosts` 钉真实 CF IP（见下），正式解法套 pages.dev 反代。
 5. **DO 换模型后 5–10 分钟内仍跑旧代码**：Durable Object 驱逐延迟，属平台行为。
 
-## 验收清单
+## 验收清单（2026-10-29 全部通过 ✅）
 
-| # | 验证点 | 方法 | 预期 |
+| # | 验证点 | 方法 | 结果 |
 |---|---|---|---|
-| 1 | pi agent 在 DO 上运行 | 任意消息 | 正常回复 |
-| 2 | Workers AI 免费模型 | `GET /api/health` | model 字段为 `@cf/zai-org/glm-5.3-flash` |
-| 3 | ai_search 工具被调用 | 问「知识库里的暗号是什么？」 | 答「紫电青霜-2026」且注明来自知识库 |
-| 4 | AI Search 实例与索引 | `GET /api/status` | status 为 indexed/ready |
-| 5 | DO 持久化 | 重启后 `GET /api/messages` | 转录还在 |
+| 1 | pi agent 在 DO 上运行 | 任意消息 | ✅ PiHarness（beta）+ pi-durable 1.4 |
+| 2 | Workers AI 免费模型 | 对话直答 + 工具调用 | ✅ gpt-oss-120b（自动经 AI Gateway） |
+| 3 | ai_search 工具 | 问「知识库里的暗号是什么？」 | ✅ 答「紫电青霜-2026」（该事实只在知识库里） |
+| 4 | AI Search 实例与索引 | `GET /api/status` | ✅ 空实例 + Items REST 上传 3 份文档 |
+| 5 | DO 持久化 | `GET /api/messages` | ✅ 转录跨请求保留 |
+
+线上：https://cloudflare-free-ai-pi.dongchangyang.workers.dev （workers.dev 大陆被污染，见踩坑 4）
 
 ## 免费额度边界（2026-10 核实）
 
