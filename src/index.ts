@@ -37,11 +37,12 @@ export default {
       });
     }
 
-    // One-time setup: create the AI Search instance over the docs R2 bucket
-    // and make sure it exists. Idempotent — safe to call again.
-    // NOTE: the Items API (built-in storage) is documented but not yet exposed
-    // by the binding runtime ("items is not a function" server-side), so this
-    // project uses an R2 data source; docs are uploaded via scripts/upload-docs.sh.
+    // One-time setup: create the EMPTY AI Search instance (built-in storage).
+    // Idempotent. Docs are uploaded separately via scripts/kb-sync.sh
+    // (Items REST API) — the binding's items.upload() is documented but not
+    // yet implemented in the runtime, and web-crawler/r2 sources need extra
+    // prerequisites (owned zone / card), so empty + REST upload is the
+    // zero-card, zero-token path.
     if (pathname === "/api/setup" && request.method === "POST") {
       const instance = env.AI_SEARCH.get(env.KB_INSTANCE);
       let created = false;
@@ -54,28 +55,14 @@ export default {
         const msg = error instanceof Error ? error.message : String(error);
         steps.info = `absent (${msg.slice(0, 120)})`;
       }
-      if (info && info.type === null) {
-        // empty instance from an earlier create — replace with R2-backed one
-        try {
-          await (env.AI_SEARCH as unknown as { delete(id: string): Promise<unknown> }).delete(
-            env.KB_INSTANCE,
-          );
-          steps.replace = "deleted-empty-instance";
-        } catch (error) {
-          steps.replace =
-            "delete-failed: " + (error instanceof Error ? error.message : String(error));
-        }
-        info = null;
+      if (info && info.type !== null) {
+        steps.info += ` (type=${info.type})`;
       }
       if (!info) {
         try {
-          await env.AI_SEARCH.create({
-            id: env.KB_INSTANCE,
-            type: "r2",
-            source: "cf-free-ai-pi-docs",
-          });
+          await env.AI_SEARCH.create({ id: env.KB_INSTANCE });
           created = true;
-          steps.create = "ok(r2)";
+          steps.create = "ok(empty)";
         } catch (error) {
           const msg = error instanceof Error ? error.message : String(error);
           if (/exist|409/i.test(msg)) {

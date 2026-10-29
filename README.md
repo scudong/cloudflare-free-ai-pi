@@ -20,22 +20,21 @@
 └─ ai_search_namespaces  → AI Search instance (built-in storage, no R2)
 ```
 
-## 部署（4 步）
+## 部署（3 步）
 
 ```bash
 npm install
 npx wrangler deploy
-# R2 免费档（10GB），控制台一次性开通：https://dash.cloudflare.com → R2
-./scripts/upload-docs.sh          # 建 R2 桶并上传 public/docs/*.md
 curl -X POST https://cloudflare-free-ai-pi.<your-subdomain>.workers.dev/api/setup
+./scripts/kb-sync.sh        # 把 public/docs/*.md 经 Items REST API 传入知识库（用 wrangler 本地 OAuth，零 token 零绑卡）
 ```
 
-`/api/setup` 幂等：创建（或替换为）R2 数据源的 AI Search 实例 `cf-free-ai-pi-kb`，索引约 1–3 分钟。打开站点首页点「初始化知识库」也可以。
+`/api/setup` 幂等：创建空实例 `cf-free-ai-pi-kb`（内置存储）。索引约 1–3 分钟（`GET /api/status` 看 status 变为 indexed/ready）。打开站点首页点「初始化知识库」也可以。
 
 ## 实测踩坑（2026-10-29）
 
 1. **官方示例的默认模型不在免费计划**：`@cf/zai-org/glm-5.3-flash` 和 `@cf/deepseek-ai/deepseek-v4-flash-0731` 都报 403 "not available on the Workers Free plan"（官方文档的 free 过滤器不可信）。已换 `@cf/openai/gpt-oss-120b`。**实测免费可用的 chat 模型**（`GET /api/probe-models` 可复跑）：llama-3.3-70b-fast、llama-3.1-8b-fast、llama-4-scout、gpt-oss-120b/20b、qwen3-30b-a3b、qwq-32b、deepseek-r1-distill-qwen-32b、gemma-4-26b、nemotron-3-120b；付费档：glm-5.3-flash、kimi-k2.7-code。
-2. **AI Search Items API（内置存储）文档有、binding 运行时没有**：`instance.items.upload()` 在服务端报 "items is not a function"（compat date 已顶到 2026-10-23 仍如此）。改走 R2 数据源，效果等价。
+2. **AI Search 数据源三选一的真实可用性**：① Items API（内置存储）——binding 运行时未实现（`items.upload()` 报 "items is not a function"，compat date 2026-10-23 仍如此），但 **REST API 可用**（`POST .../instances/{id}/items` multipart），且 wrangler 本地 OAuth token 就有权限（`scripts/kb-sync.sh`）；② web-crawler——要求 source 是账号自有 zone（`sitemap_requires_owned_zone`），没自有域名用不了；③ R2——免费开通现在要绑卡。故最终方案 = 空实例 + REST 传文档。
 3. **Workers AI binding 自动走 AI Gateway**：模型报错 diagnostics 里 `gateway: "default"`——AI Gateway 免费档白送挂上了。
 4. **workers.dev 大陆 DNS 污染**：新域名解析到假 IP 导致"请求黑洞"（无响应、tail 无事件）。临时解法 `/etc/hosts` 钉真实 CF IP（见下），正式解法套 pages.dev 反代。
 5. **DO 换模型后 5–10 分钟内仍跑旧代码**：Durable Object 驱逐延迟，属平台行为。
