@@ -1,0 +1,28 @@
+{
+  "name": "cloudflare-free-ai-pi",
+  "version": "0.1.0",
+  "description": "Free-tier Pi agent on Cloudflare: PiHarness on Durable Objects + Workers AI + AI Search — no paid plan, no API tokens",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "types": "wrangler types env.d.ts --include-runtime false",
+    "check": "tsc --noEmit",
+    "verify": "node scripts/verify.mjs"
+  },
+  "dependencies": {
+    "agents": "0.31.0",
+    "@earendil-works/chord": "~1.4.0",
+    "@earendil-works/pi-ai": "~1.4.0",
+    "@earendil-works/pi-durable": "~1.4.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261014.1",
+    "typescript": "^5.9.0",
+    "wrangler": "^4.145.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["workerd", "esbuild", "protobufjs", "core-js-pure", "@google/genai"]
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cloudflare-free-ai-pi",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./public"
+  },
+  "ai": {
+    "binding": "AI"
+  },
+  "ai_search_namespaces": [
+    {
+      "binding": "AI_SEARCH",
+      "namespace": "default"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "PI_AGENT",
+        "class_name": "PiAgent"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["PiAgent"]
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    // Workers AI model. Free-plan eligible; swap via `wrangler deploy --var MODEL_ID:...`
+    "MODEL_ID": "@cf/deepseek-ai/deepseek-v4-flash-0731",
+    // AI Search instance created by POST /api/setup
+    "KB_INSTANCE": "cf-free-ai-pi-kb"
+  }
+}
