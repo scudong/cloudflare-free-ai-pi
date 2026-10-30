@@ -49,7 +49,9 @@ curl -X POST https://cloudflare-free-ai-pi.<your-subdomain>.workers.dev/api/setu
 | 4 | AI Search 实例与索引 | `GET /api/status` | ✅ 空实例 + Items REST 上传 3 份文档 |
 | 5 | DO 持久化 | `GET /api/messages` | ✅ 转录跨请求保留 |
 
-线上：https://cloudflare-free-ai-pi.dongchangyang.workers.dev （workers.dev 大陆被污染，见踩坑 4）
+线上：
+- 大陆直连（推荐）：https://cloudflare-free-ai-pi-mirror.pages.dev （Pages 反代镜像，CI 同步部署）
+- 原始入口：https://cloudflare-free-ai-pi.dongchangyang.workers.dev （workers.dev 大陆被污染，见踩坑 4）
 
 ## 免费额度边界（2026-10 核实）
 
