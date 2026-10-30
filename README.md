@@ -53,6 +53,20 @@ curl -X POST https://cloudflare-free-ai-pi.<your-subdomain>.workers.dev/api/setu
 - 大陆直连（推荐）：https://cloudflare-free-ai-pi-mirror.pages.dev （Pages 反代镜像，CI 同步部署）
 - 原始入口：https://cloudflare-free-ai-pi.dongchangyang.workers.dev （workers.dev 大陆被污染，见踩坑 4）
 
+## 公用知识库（任意 agent 均可调用）
+
+同一个 AI Search 实例 `cf-free-ai-pi-kb` 是「云端公用知识库」，实测两类调用方都能取到同一份检索结果（2026-10-30）：
+
+1. **任意本地/CLI agent**（零 token：wrangler 本地 OAuth）：
+   ```bash
+   curl -X POST "https://api.cloudflare.com/client/v4/accounts/$ACC/ai-search/namespaces/default/instances/cf-free-ai-pi-kb/search" \
+     -H "Authorization: Bearer $(grep oauth_token ~/Library/Preferences/.wrangler/config/default.toml | cut -d'"' -f2)" \
+     -H "content-type: application/json" \
+     -d '{"messages":[{"role":"user","content":"你的问题"}]}'
+   ```
+   返回 `result.chunks[]`（含 score / 来源文件 key）。
+2. **云端 Pi agent**（本项目 DO）：`POST /api/chat {"message":...}`，agent 自主调 `ai_search` 工具。
+
 ## 免费额度边界（2026-10 核实）
 
 - Workers AI：10,000 Neurons/天
